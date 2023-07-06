@@ -35,10 +35,11 @@ def get_pokemon_info(pokemon_name):
     if res.ok:
         data = res.json()
         pokemon_data = dict()
+        pokemon_data['abilities'] = dict()
         pokemon_data['name'] = data['forms'][0]['name'].title()
         i = 1
         for ability in data['abilities']:
-            pokemon_data['ability ' + str(i)] = ability['ability']['name']
+            pokemon_data['abilities']['Ability ' + str(i)] = ability['ability']['name']
             i += 1
         i = 1
         pokemon_data['base experience'] = data['base_experience']

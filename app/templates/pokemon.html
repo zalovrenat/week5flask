@@ -19,6 +19,9 @@
             <h5 class="card-title">{{pokemon_data['name']}}</h5>
             </div>
             <ul class="list-group list-group-flush">
+            {% for ability in pokemon_data['abilities']%}
+                <li class="list-group-item">{{ ability }}: {{ pokemon_data['abilities'][ability] }}</li>
+            {% endfor %}
             <li class="list-group-item">Base Experience: {{ pokemon_data['base experience'] }}</li>
             <li class="list-group-item">HP Base Stat: {{ pokemon_data['hp base stat'] }}</li>
             <li class="list-group-item">Attack Base Stat: {{ pokemon_data['attack base stat'] }}</li>
