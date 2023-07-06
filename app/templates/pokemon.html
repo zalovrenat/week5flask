@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>This is the Pokemon Search Page</h1>
+<br/>
+<div class="row mx-auto">
+    <form class="col-4 my-auto" action="/pokemon" method="POST">
+        {{ form.hidden_tag() }}
+
+        {{ form.pokename(class='form-control', placeholder='Please Enter Pokemon Name Here') }}
+        {{ form.submit(class='btn-primary') }}
+    </form>
+
+    {% if pokemon_data %}
+        <div class="card" style="width: 18rem;">
+            <img src="{{pokemon_data['img']}}" class="card-img-top" alt="poke avatar">
+            <div class="card-body">
+            <h5 class="card-title">{{pokemon_data['name']}}</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+            <li class="list-group-item">Base Experience: {{ pokemon_data['base experience'] }}</li>
+            <li class="list-group-item">HP Base Stat: {{ pokemon_data['hp base stat'] }}</li>
+            <li class="list-group-item">Attack Base Stat: {{ pokemon_data['attack base stat'] }}</li>
+            <li class="list-group-item">Defense Base Stat: {{ pokemon_data['defense base stat'] }}</li>
+            </ul>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

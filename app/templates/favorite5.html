@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="row mx-0 my-5">
+        {% for poke in favorite_pokemons %}
+            <div class="card text-center mx-auto" style="width: 18rem;">
+                <img src="{{poke['image']}}" class="card-img-top" alt="poke avatar">
+                <div class="card-body">
+                <h5 class="card-title">{{poke['name']}}</h5>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
