@@ -4,30 +4,51 @@
 
 <h1>This is the Pokemon Search Page</h1>
 <br/>
+{% if not pokemon_data and request.method == 'POST' %}
+    <h4 style="color: red;">{{ message }}</h4>
+    <a style="color: red;" href="{{message_link}}" target="_blank"><h4>List of Pokemon</h4></a>
+{% endif %}
 <div class="row mx-auto">
-    <form class="col-4 my-auto" action="/pokemon" method="POST">
-        {{ form.hidden_tag() }}
+    <div class="col">
+        <form class="col-6 my-auto me-0" action="/pokemon" method="POST">
+            {{ form.hidden_tag() }}
 
-        {{ form.pokename(class='form-control', placeholder='Please Enter Pokemon Name Here') }}
-        {{ form.submit(class='btn-primary') }}
-    </form>
+            {{ form.pokename(class='form-control', placeholder='Please Enter Pokemon Name Here') }}
+            {{ form.submit(class='btn-primary') }}
+        </form>
+    </div>
 
-    {% if pokemon_data %}
-        <div class="card" style="width: 18rem;">
-            <img src="{{pokemon_data['img']}}" class="card-img-top" alt="poke avatar">
-            <div class="card-body">
-            <h5 class="card-title">{{pokemon_data['name']}}</h5>
+    <div class="col">
+        {% if pokemon_data %}
+            <div class="card" style="width: 24rem;">
+                <img src="{{pokemon_data['img']}}" class="card-img-top" alt="poke avatar">
+                <div class="card-body">
+                    <h3 class="card-title text-center">{{pokemon_data['name']}}</h3>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <div class="row">
+                        <div class="col pe-0">
+                            {% for ability in pokemon_data['abilities']%}
+                                <li class="list-group-item">{{ ability }}:</li>
+                            {% endfor %}
+                                <li class="list-group-item">Base Experience:</li>
+                                <li class="list-group-item">HP Base Stat:</li>
+                                <li class="list-group-item">Attack Base Stat:</li>
+                                <li class="list-group-item">Defense Base Stat:</li>
+                        </div>
+                        <div class="col ps-0">
+                            {% for ability in pokemon_data['abilities']%}
+                                <li class="list-group-item">{{ pokemon_data['abilities'][ability] }}</li>
+                            {% endfor %}
+                                <li class="list-group-item">{{ pokemon_data['base experience'] }}</li>
+                                <li class="list-group-item">{{ pokemon_data['hp base stat'] }}</li>
+                                <li class="list-group-item">{{ pokemon_data['attack base stat'] }}</li>
+                                <li class="list-group-item">{{ pokemon_data['defense base stat'] }}</li>
+                        </div>
+                    </div>
+                </ul>
             </div>
-            <ul class="list-group list-group-flush">
-            {% for ability in pokemon_data['abilities']%}
-                <li class="list-group-item">{{ ability }}: {{ pokemon_data['abilities'][ability] }}</li>
-            {% endfor %}
-            <li class="list-group-item">Base Experience: {{ pokemon_data['base experience'] }}</li>
-            <li class="list-group-item">HP Base Stat: {{ pokemon_data['hp base stat'] }}</li>
-            <li class="list-group-item">Attack Base Stat: {{ pokemon_data['attack base stat'] }}</li>
-            <li class="list-group-item">Defense Base Stat: {{ pokemon_data['defense base stat'] }}</li>
-            </ul>
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
