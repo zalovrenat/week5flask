@@ -4,10 +4,7 @@
 
 <h1>This is the Pokemon Search Page</h1>
 <br/>
-{% if not pokemon_data and request.method == 'POST' %}
-    <h4 style="color: red;">{{ message }}</h4>
-    <a style="color: red;" href="{{message_link}}" target="_blank"><h4>List of Pokemon</h4></a>
-{% endif %}
+
 <div class="row mx-auto">
     <div class="col">
         <form class="col-6 my-auto me-0" action="/pokemon" method="POST">
@@ -22,8 +19,11 @@
         {% if pokemon_data %}
             <div class="card" style="width: 24rem;">
                 <img src="{{pokemon_data['img']}}" class="card-img-top" alt="poke avatar">
-                <div class="card-body">
-                    <h3 class="card-title text-center">{{pokemon_data['name']}}</h3>
+                <div class="card-body mx-auto position-relative">
+                    <h3 class="card-title text-center">#{{pokemon_data['pokemon #']}} - {{pokemon_data['name']}}</h3>
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('catchPokemon') }}" class="btn btn-secondary position-relative start-50 translate-middle-x">Catch {{pokemon_data['name']}}!</a>
+                    {% endif %}
                 </div>
                 <ul class="list-group list-group-flush">
                     <div class="row">

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <main class="flex justify-content-center">
+        {% for poke in all_pokemon %}
+            <div class="card" style="width: 24rem;">
+                <img src="{{poke.img_url}}" class="card-img-top" alt="poke avatar">
+                <div class="card-body mx-auto position-relative">
+                    <h3 class="card-title text-center">#{{poke.pokemon_id}} - {{poke.pokemon_name}}</h3>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <div class="row">
+                        <div class="col pe-0">
+                            {% if poke.ability1 != '' %}
+                                <li class="list-group-item">Ability 1:</li>
+                            {% endif %}
+                            {% if poke.ability2 != '' %}
+                                <li class="list-group-item">Ability 2:</li>
+                            {% endif %}
+                                <li class="list-group-item">Base Experience:</li>
+                                <li class="list-group-item">HP Base Stat:</li>
+                                <li class="list-group-item">Attack Base Stat:</li>
+                                <li class="list-group-item">Defense Base Stat:</li>
+                        </div>
+                        <div class="col ps-0">
+                            {% if poke.ability1 != '' %}
+                                <li class="list-group-item">{{ poke.ability1 }}</li>
+                            {% endif %}
+                            {% if poke.ability2 != '' %}
+                                <li class="list-group-item">{{ poke.ability2 }}</li>
+                            {% endif %}
+                                <li class="list-group-item">{{ poke.base_xp }}</li>
+                                <li class="list-group-item">{{ poke.hp_base_stat }}</li>
+                                <li class="list-group-item">{{ poke.attack_base_stat }}</li>
+                                <li class="list-group-item">{{ poke.defense_base_stat }}</li>
+                        </div>
+                    </div>
+                </ul>
+            </div>
+        {% endfor %}
+    </main>
+
+{% endblock %}
