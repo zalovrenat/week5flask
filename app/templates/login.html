@@ -8,10 +8,6 @@
     <form class="col-4" action="/login" method="POST">
         {{ form.hidden_tag() }}
 
-        {% if message %}
-            <h4 style="color: red;">{{ message }}</h4>
-        {% endif %}
-
         {{ form.username(class='form-control', placeholder='Username') }}
         {{ form.password(class='form-control', placeholder='Password') }}
         {{ form.submit(class='btn-primary') }}
