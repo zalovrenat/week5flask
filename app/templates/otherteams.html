@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <main class="flex justify-content-center">
+        {% for trainer_name,pokemons in other_teams.items() %}
+            <div class="row">
+                <div class="col-1 align-self-center text-center">
+                    <div>
+                        Trainer: {{trainer_name}}
+                    </div>
+                    <div>
+                        <a href="{{ url_for('battleTrainer', trainer_name=trainer_name) }}" class="btn btn-secondary">Battle!</a>
+                    </div>
+                </div>
+                {% for pokemon_id,pokemon_info in pokemons.items() %}
+                    <div class="col-2">
+                        <div class="card" style="width: 21rem;">
+                            <img src="{{pokemon_info['img_url']}}" class="card-img-top" alt="poke avatar">
+                            <div class="card-body mx-auto position-relative">
+                                <h3 class="card-title text-center">#{{pokemon_info['pokemon_id']}} - {{pokemon_info['pokemon_name']}}</h3>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <div class="row">
+                                    <div class="col pe-0">
+                                        {% if pokemon_info['ability1'] != '' %}
+                                            <li class="list-group-item">Ability 1:</li>
+                                        {% endif %}
+                                        {% if pokemon_info['ability2'] != '' %}
+                                            <li class="list-group-item">Ability 2:</li>
+                                        {% endif %}
+                                            <li class="list-group-item">Base Experience:</li>
+                                            <li class="list-group-item">HP Base Stat:</li>
+                                            <li class="list-group-item">Attack Base Stat:</li>
+                                            <li class="list-group-item">Defense Base Stat:</li>
+                                    </div>
+                                    <div class="col ps-0">
+                                        {% if pokemon_info['ability1'] != '' %}
+                                            <li class="list-group-item">{{ pokemon_info['ability1'] }}</li>
+                                        {% endif %}
+                                        {% if pokemon_info['ability2'] != '' %}
+                                            <li class="list-group-item">{{ pokemon_info['ability2'] }}</li>
+                                        {% endif %}
+                                            <li class="list-group-item">{{ pokemon_info['base_xp'] }}</li>
+                                            <li class="list-group-item">{{ pokemon_info['hp_base_stat'] }}</li>
+                                            <li class="list-group-item">{{ pokemon_info['attack_base_stat'] }}</li>
+                                            <li class="list-group-item">{{ pokemon_info['defense_base_stat'] }}</li>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </main>
+
+{% endblock %}

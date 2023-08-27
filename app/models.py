@@ -12,11 +12,13 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100),nullable=False,unique=True)
     password = db.Column(db.String,nullable=False)
     date_created = db.Column(db.DateTime,nullable=False,default=datetime.utcnow())
+    wins = db.Column(db.Integer,nullable=False)
 
-    def __init__(self,username,email,password):
+    def __init__(self,username,email,password,wins=0):
         self.username = username
         self.email = email
         self.password = generate_password_hash(password)
+        self.wins = wins
     
     def get_id(self):
         try:
@@ -81,7 +83,17 @@ class Pokemon(db.Model):
 class Team(db.Model):
     team_id = db.Column(db.Integer,primary_key=True)
     user_id = db.Column(db.Integer,db.ForeignKey('user.user_id'),nullable=False,unique=True)
-    pokemon_id = db.Column(db.Integer,db.ForeignKey('pokemon.pokemon_id'),nullable=False)
 
     def __init__(self, user_id):
         self.user_id = user_id
+
+class TeamPokemon(db.Model):
+    team_pokemon_id = db.Column(db.Integer,primary_key=True)
+    team_id = db.Column(db.Integer,db.ForeignKey('team.team_id'),nullable=False)
+    pool_pokemon_id = db.Column(db.Integer,db.ForeignKey('pool_pokemon.pool_pokemon_id'),nullable=False)
+    pokemon_id = db.Column(db.Integer,db.ForeignKey('pokemon.pokemon_id'),nullable=False)
+
+    def __init__(self, team_id, pool_pokemon_id, pokemon_id):
+        self.team_id = team_id
+        self.pool_pokemon_id = pool_pokemon_id
+        self.pokemon_id = pokemon_id

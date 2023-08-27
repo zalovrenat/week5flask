@@ -2,9 +2,14 @@
     {% if messages %}
     
         {% for category, message in messages %}
-            {% if category == 'warning' %}
+            {% if category == 'warning-with-link' %}
                 <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
                     {{ message }} <a href="https://www.pokemon.com/us/pokedex" target="_blank" class="alert-link">here</a>.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% elif category == 'warning' %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% else %}

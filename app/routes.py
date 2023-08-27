@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash
 from app import app
 from .forms import PokemonSearch, LoginForm, SignUpForm
-from .models import User, db, Pokedex, PokedexPokemon, Pool, PoolPokemon, Pokemon
+from .models import db, User, Pokedex, PokedexPokemon, Pool, PoolPokemon, Pokemon, Team, TeamPokemon
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash
 import requests as r
@@ -43,7 +43,7 @@ def get_pokemon_info(pokemon_name):
         data = res.json()
         pokemon_data = dict()
         pokemon_data['pokemon #'] = data['id']
-        pokemon_data['name'] = data['forms'][0]['name'].title()
+        pokemon_data['name'] = data['name'].title()
         pokemon_data['abilities'] = dict()
         i = 1
         for ability in data['abilities']:
@@ -66,28 +66,27 @@ def pokemonSearch():
         if form.validate():
             pokemon = form.pokename.data
             poke_data = get_pokemon_info(pokemon.lower())
-            print(poke_data)
             global_pokemon_data = poke_data
-            if Pokemon.query.filter_by(pokemon_id=poke_data['pokemon #']).first():
-                pass
-            elif len(poke_data['abilities']) > 1:
-                addPokemon = Pokemon(poke_data['pokemon #'],poke_data['name'],poke_data['img'],poke_data['abilities']['Ability 1'],poke_data['abilities']['Ability 2'],poke_data['base experience'],poke_data['hp base stat'],poke_data['attack base stat'],poke_data['defense base stat'])
-                db.session.add(addPokemon)
-                db.session.commit()
-            else:
-                addPokemon = Pokemon(poke_data['pokemon #'],poke_data['name'],poke_data['img'],poke_data['abilities']['Ability 1'],None,poke_data['base experience'],poke_data['hp base stat'],poke_data['attack base stat'],poke_data['defense base stat'])
-                db.session.add(addPokemon)
-                db.session.commit()
+            if poke_data:
+                if Pokemon.query.filter_by(pokemon_id=poke_data['pokemon #']).first():
+                    pass
+                elif len(poke_data['abilities']) > 1:
+                    addPokemon = Pokemon(poke_data['pokemon #'],poke_data['name'],poke_data['img'],poke_data['abilities']['Ability 1'],poke_data['abilities']['Ability 2'],poke_data['base experience'],poke_data['hp base stat'],poke_data['attack base stat'],poke_data['defense base stat'])
+                    db.session.add(addPokemon)
+                    db.session.commit()
+                else:
+                    addPokemon = Pokemon(poke_data['pokemon #'],poke_data['name'],poke_data['img'],poke_data['abilities']['Ability 1'],None,poke_data['base experience'],poke_data['hp base stat'],poke_data['attack base stat'],poke_data['defense base stat'])
+                    db.session.add(addPokemon)
+                    db.session.commit()
 
-            if not poke_data:
-                flash('That is not a valid pokemon name. Please see a list of valid pokemon names ','warning')
+            else:
+                flash('That is not a valid pokemon name. Please see a list of valid pokemon names ','warning-with-link')
     
     return render_template('pokemonsearch.html', form=form, pokemon_data=poke_data)
 
 @app.route('/login', methods=['GET','POST'])
 def loginPage():
     form = LoginForm()
-    message = None
     if request.method == 'POST':
         if form.validate():
             username = form.username.data
@@ -108,7 +107,7 @@ def loginPage():
         else:
             flash('An error has ocurred. PLease submit a valid form.', 'danger')
 
-    return render_template('login.html', form=form, message=message)
+    return render_template('login.html', form=form)
 
 def username_in_db(username):
     return User.query.filter_by(username=username).first()
@@ -142,14 +141,17 @@ def signUpPage():
 
                 user = User.query.filter_by(username=username).first()
                 user_id = user.user_id
+                
                 pokedex = Pokedex(user_id)
-
                 db.session.add(pokedex)
                 db.session.commit()
-
+                
                 pool = Pool(user_id)
-
                 db.session.add(pool)
+                db.session.commit()
+
+                team = Team(user_id)                
+                db.session.add(team)
                 db.session.commit()
 
                 flash('Successfully created an account.', 'success')
@@ -220,6 +222,7 @@ def myPokemon():
     all_pokemon = dict()
     for pokemon in pokemon_list:
         all_pokemon[pokemon.pool_pokemon_id] = Pokemon.query.filter_by(pokemon_id=pokemon.pokemon_id).first()
+    print(all_pokemon)
     # pokemon_id_list.sort()
     # all_pokemon = dict()
     # for poke_id in pokemon_id_list:
@@ -244,3 +247,116 @@ def releasePokemon(pool_pokemon_id):
     db.session.commit()
     flash('Pokemon successfully released.', 'success')
     return redirect(url_for('myPokemon'))
+
+@app.route('/mypokemon/addtoteam/<pool_pokemon_id>')
+@login_required
+def addToTeam(pool_pokemon_id):
+    user_id = current_user.user_id
+    team_id = Team.query.filter_by(user_id=user_id).first().team_id
+    pokemon_id = PoolPokemon.query.filter_by(pool_pokemon_id=pool_pokemon_id).first().pokemon_id
+    team = TeamPokemon.query.filter_by(team_id = team_id)
+    team_num_pokemon = len(TeamPokemon.query.filter_by(team_id = team_id).all())
+
+    if team:
+        current_team_pokemon = TeamPokemon.query.filter_by(team_id = team_id).all()
+        for pokemon in current_team_pokemon:
+            if int(pool_pokemon_id) == pokemon.pool_pokemon_id:
+                flash('Pokemon not added - this pokemon is already in the team.', 'danger')
+                return redirect(url_for('myPokemon'))
+        if team_num_pokemon < 5:
+            team_pokemon = TeamPokemon(team_id,pool_pokemon_id,pokemon_id)
+            db.session.add(team_pokemon)
+            db.session.commit()
+            flash('Pokemon successfully added to team.', 'success')
+            return redirect(url_for('myPokemon'))
+        else:
+            flash('Pokemon not added - there are already 5 Pokemon in the team.', 'danger')
+            return redirect(url_for('myPokemon'))
+    else:
+        team_pokemon = TeamPokemon(team_id,pool_pokemon_id,pokemon_id)
+        db.session.add(team_pokemon)
+        db.session.commit()
+        flash('Pokemon successfully added to team.', 'success')
+        return redirect(url_for('myPokemon'))
+    
+@app.route('/myteam/removefromteam/<team_pokemon_id>')
+@login_required
+def removeFromTeam(team_pokemon_id):
+    pokemon = TeamPokemon.query.get(team_pokemon_id)
+    db.session.delete(pokemon)
+    db.session.commit()
+    flash('Pokemon successfully removed from team.', 'success')
+    return redirect(url_for('myTeam'))
+
+
+@app.route('/myteam')
+@login_required
+def myTeam():
+    team_id = Team.query.filter_by(user_id=current_user.user_id).first().team_id
+    team_pokemons = TeamPokemon.query.filter_by(team_id = team_id).all()
+    my_team = dict()
+    if team_pokemons:
+        for poke in team_pokemons:
+            my_team[poke.team_pokemon_id] = Pokemon.query.filter_by(pokemon_id=poke.pokemon_id).first()
+
+    return render_template('myteam.html', my_team=my_team)
+
+@app.route('/otherteams')
+@login_required
+def otherTeams():
+    user_id = current_user.user_id
+    teams = Team.query.filter(Team.user_id != user_id).all()
+    other_teams = dict()
+    for team in teams:
+        trainer_name = User.query.filter_by(user_id = team.user_id).first().username
+        team_pokemons = TeamPokemon.query.filter_by(team_id = team.team_id).all()
+        pokemons = dict()
+        for poke in team_pokemons:
+            pokemons[poke.pokemon_id] = Pokemon.query.filter_by(pokemon_id = poke.pokemon_id).first()
+        if len(team_pokemons) == 5:
+            other_teams[trainer_name] = pokemons
+    print(other_teams)
+    return render_template('otherteams.html', other_teams=other_teams)
+
+@app.route('/battletrainer/<trainer_name>')
+@login_required
+def battleTrainer(trainer_name):
+    print(trainer_name)
+    user_id = current_user.user_id
+    my_team_id = Team.query.filter_by(user_id=user_id).first().team_id
+    my_team_pokemons = TeamPokemon.query.filter_by(team_id=my_team_id).all()
+    my_pokemons = []
+    for my_poke in my_team_pokemons:
+        my_pokemons.append(Pokemon.query.filter_by(pokemon_id = my_poke.pokemon_id).first())
+    my_team_hp = 0
+    my_team_attack = 0
+    my_team_defense = 0
+    for my_poke in my_pokemons:
+        my_team_hp += my_poke.hp_base_stat
+        my_team_attack += my_poke.attack_base_stat
+        my_team_defense += my_poke.defense_base_stat
+        
+    other_trainer_id = User.query.filter_by(username=trainer_name).first().user_id
+    other_team_id = Team.query.filter_by(user_id=other_trainer_id).first().team_id
+    other_team_pokemons = TeamPokemon.query.filter_by(team_id=other_team_id).all()
+    other_pokemons = []
+    for other_poke in other_team_pokemons:
+        other_pokemons.append(Pokemon.query.filter_by(pokemon_id = other_poke.pokemon_id).first())
+    other_team_hp = 0
+    other_team_attack = 0
+    other_team_defense = 0
+    for other_poke in other_pokemons:
+        other_team_hp += other_poke.hp_base_stat
+        other_team_attack += other_poke.attack_base_stat
+        other_team_defense += other_poke.defense_base_stat
+    
+    user = User.query.filter_by(user_id=current_user.user_id).first()
+    
+    if (my_team_hp+my_team_attack+my_team_defense) > (other_team_hp+other_team_attack+other_team_defense):
+        user.wins += 1
+        db.session.commit()
+        flash('Congratualations! You have won the battle.', 'success')
+    else:
+        flash('You lost the battle. Try again next time!', 'warning')
+
+    return redirect(url_for('otherTeams'))
